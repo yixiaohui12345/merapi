@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+////////////////////////////////////////////////////////////////////////////////
+//
+//  This program is free software; you can redistribute it and/or modify 
+//  it under the terms of the GNU General Public License as published by the 
+//  Free Software Foundation; either version 3 of the License, or (at your 
+//  option) any later version.
+//
+//  This program is distributed in the hope that it will be useful, but 
+//  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
+//  or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License 
+//  for more details.
+//
+//  You should have received a copy of the GNU General Public License along 
+//  with this program; if not, see <http://www.gnu.org/licenses>.
+//
+////////////////////////////////////////////////////////////////////////////////
+-->
+
+<!-- ======================================================================= -->
+<!--  Merapi Ant Build Task                                                  -->
+<!-- ======================================================================= -->
+<project name="Merapi Framework Builder" default="build-jar" basedir="./"> 
+	
+	<!-- =================================================================== -->
+	<!-- PROPERTIES ======================================================== -->
+	<!-- =================================================================== -->
+
+		<!-- =============================================================== -->
+		<!-- 	SOURCE_PATH  				                                 -->
+		<!-- =============================================================== -->
+		<property name="SOURCE_PATH" value="./src" />   
+
+		<!-- =============================================================== -->
+		<!-- 	BUILD_PATH   				                                 -->
+		<!-- =============================================================== -->
+		<property name="BUILD_PATH" value="./build" />   
+
+		<!-- =============================================================== -->
+		<!-- 	DIST_PATH					                                 -->
+		<!-- =============================================================== -->
+		<property name="DIST_PATH" value="./dist"/>
+	
+		<!-- =============================================================== -->
+		<!-- 	LIB_PATH					                                 -->
+		<!-- =============================================================== -->
+		<property name="LIB_PATH" value="./libs"/>
+	
+		<!-- =============================================================== -->
+		<!-- 	PROJECT_NAME				                                 -->
+		<!-- =============================================================== -->
+		<property name="PROJECT_NAME" value="merapi-core" />        
+	
+		<!-- =============================================================== -->
+		<!-- 	VERSION      				                                 -->
+		<!-- =============================================================== -->
+		<property name="VERSION" value="0.0.1-beta" />
+	
+
+		<!-- =============================================================== -->
+		<!-- 	COMPILE_DEBUG   			                                 -->
+		<!-- =============================================================== -->
+		<property name="COMPILE_DEBUG"       value="true"/>
+	
+		<!-- =============================================================== -->
+		<!-- 	COMPILE_DEPRECATION			                                 -->
+		<!-- =============================================================== -->
+		<property name="COMPILE_DEPRECATION" value="false"/>
+	
+		<!-- =============================================================== -->
+		<!-- 	COMPILE_OPTIMIZE			                                 -->
+		<!-- =============================================================== -->
+		<property name="COMPILE_OPTIMIZE"    value="true"/>
+	
+
+	<!-- =================================================================== -->
+	<!-- PATHS ============================================================= -->
+	<!-- =================================================================== -->
+
+		<!-- =============================================================== -->
+		<!-- 	COMPILE_CLASSPATH							     			 -->
+		<!-- =============================================================== -->
+		<path id="COMPILE_CLASSPATH">
+			<!-- Include all lib jars -->
+			<fileset dir="${LIB_PATH}">
+				<include name="*.jar"/>
+			</fileset>
+		</path>
+	
+	
+	<!-- =================================================================== -->
+	<!-- TASKS ============================================================= -->
+	<!-- =================================================================== -->
+
+		<!-- =============================================================== -->
+		<!-- 	compile							     						 -->
+		<!--		Compiles the Merapi classes                              -->
+		<!-- =============================================================== -->
+		<target name="compile" description="Compiles the Merapi classes">
+			<!-- Compile Java classes as necessary -->
+			<mkdir dir="${BUILD_PATH}"/>
+			<javac srcdir="${SOURCE_PATH}" destdir="${BUILD_PATH}"
+				debug="${COMPILE_DEBUG}" deprecation="${COMPILE_DEPRECATION}"
+				optimize="${COMPILE_OPTIMIZE}">
+				<classpath refid="COMPILE_CLASSPATH"/>
+			</javac>
+			
+			<!-- Copy application resources -->
+			<copy  todir="${BUILD_PATH}">
+				<fileset dir="${SOURCE_PATH}" excludes="**/*.java">
+					<exclude name="**/*.java"/>
+				</fileset>
+			</copy>
+		</target>
+
+		<!-- =============================================================== -->
+		<!-- 	build-jar													 -->
+		<!--		Builds the Merapi jar                                    -->
+		<!-- =============================================================== -->
+		<target name="build-jar" depends="compile" 
+		        description="Builds the Merapi jar">
+			<!-- Make dist directory -->
+			<mkdir dir="${DIST_PATH}"/>
+			
+			<!-- Create application jar file -->
+			<jar jarfile="${DIST_PATH}/${PROJECT_NAME}-${VERSION}.jar" 
+			     basedir="${BUILD_PATH}"/>
+		</target>
+	
+</project>
