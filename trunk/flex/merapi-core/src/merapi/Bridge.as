@@ -506,6 +506,7 @@ public class Bridge
          	//  When all messages have been processed, reset __totalBytes to -1 
          	//  to prepare for the next packet of binary data
 			__totalBytes						= -1;
+			__byteBuffer						= null;
 		}
 		
 		//  Catch any errors in deserialization.
