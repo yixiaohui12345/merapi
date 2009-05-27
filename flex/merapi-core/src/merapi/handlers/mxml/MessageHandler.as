@@ -180,8 +180,22 @@ public class MessageHandler extends EventDispatcher implements IMessageHandler
 		else						lastMessage = message;
 
 		try 
-		{		
-			data		= lastMessage[ dataField ];
+		{
+			if ( dataField.indexOf( "." ) == -1 )
+			{
+				data = lastMessage[ dataField ];
+			}
+			else
+			{
+				var df : String = null;
+				var ref : Object = lastMessage;
+				var fields : Array = dataField.split( "." );
+				for each ( df in fields )
+				{
+					ref = ref[ df ];
+				}
+				data = ref;
+			}		
 		}
 		catch( e : Error ) {}			
 	}
