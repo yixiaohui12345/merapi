@@ -1,0 +1,29 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Merapi", "merapi-core-cs\Merapi.csproj", "{74231F81-8E73-4651-8D89-FC9996BDF24D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A9B8375B-579D-4F8A-B00C-F2828DB58F3A} = {A9B8375B-579D-4F8A-B00C-F2828DB58F3A}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FluorineFx-3.5", "..\FluorineFx\FluorineFx-3.5.csproj", "{A9B8375B-579D-4F8A-B00C-F2828DB58F3A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{74231F81-8E73-4651-8D89-FC9996BDF24D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{74231F81-8E73-4651-8D89-FC9996BDF24D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{74231F81-8E73-4651-8D89-FC9996BDF24D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{74231F81-8E73-4651-8D89-FC9996BDF24D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A9B8375B-579D-4F8A-B00C-F2828DB58F3A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9B8375B-579D-4F8A-B00C-F2828DB58F3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9B8375B-579D-4F8A-B00C-F2828DB58F3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9B8375B-579D-4F8A-B00C-F2828DB58F3A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
