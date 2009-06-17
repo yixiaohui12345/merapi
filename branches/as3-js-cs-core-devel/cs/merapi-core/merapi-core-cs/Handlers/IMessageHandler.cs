@@ -6,7 +6,7 @@
 
 using merapi.messages;
 
-namespace Merapi.Messages
+namespace Merapi.Handlers
 {
     /**
      *  The <code>IEventHandler</code> interface defines the methods for receiving a 

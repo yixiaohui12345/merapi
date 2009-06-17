@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 using merapi.messages;
 
-namespace Merapi.Messages
+namespace Merapi.Handlers
 {
     public class MessageHandler : IMessageHandler
     {

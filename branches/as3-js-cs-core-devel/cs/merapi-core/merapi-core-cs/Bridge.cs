@@ -8,7 +8,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Merapi.Messages;
 using System.Threading;
 using Merapi.Io.Amf;
 using System.Net.Sockets;
@@ -18,6 +17,7 @@ using System.Net;
 using merapi.messages;
 using System.IO;
 using FluorineFx.IO;
+using Merapi.Handlers;
 
 namespace Merapi
 {

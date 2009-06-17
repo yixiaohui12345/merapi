@@ -7,7 +7,6 @@
 using System;
 using System.Collections.Generic;
 using Merapi.Io.Writer;
-using Merapi.Messages;
 using merapi.messages;
 using FluorineFx.IO;
 using System.IO;
