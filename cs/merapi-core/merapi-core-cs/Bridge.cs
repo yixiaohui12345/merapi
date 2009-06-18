@@ -1,8 +1,19 @@
-﻿////////////////////////////////////////////////////////////////////////////////
+﻿/////////////////////////////////////////////////////////////////////////////////////
 //
-//  $license
+//  This program is free software; you can redistribute it and/or modify 
+//  it under the terms of the GNU Lesser General Public License as published 
+//  by the Free Software Foundation; either version 3 of the License, or (at 
+//  your option) any later version.
 //
-////////////////////////////////////////////////////////////////////////////////
+//  This program is distributed in the hope that it will be useful, but 
+//  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
+//  or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public 
+//  License for more details.
+//
+//  You should have received a copy of the GNU Lesser General Public License 
+//  along with this program; if not, see <http://www.gnu.org/copyleft/lesser.html>.
+//
+/////////////////////////////////////////////////////////////////////////////////////
 
 using System;
 using System.Collections.Generic;
@@ -18,6 +29,9 @@ using merapi.messages;
 using System.IO;
 using FluorineFx.IO;
 using Merapi.Handlers;
+using log4net.Repository.Hierarchy;
+using log4net;
+using merapi.systemexecute.handlers;
 
 namespace Merapi
 {
@@ -28,22 +42,33 @@ namespace Merapi
      *  @see merapi.events.MerapiEvent
      *  @see Merapi.Messages.IMessage;
      */
-    public class Bridge : IMessageHandler
+    public class Bridge
     {
-
 	    //--------------------------------------------------------------------------
 	    //
-	    //  Constants
+	    //  Class Constants
 	    //
 	    //--------------------------------------------------------------------------
     	
+	    public const String CONFIG_PATH 		= "./config/merapi-native-config.xml";
+	    public const String READER_STRING 		= "reader";
+	    public const String WRITER_STRING 		= "writer";
+	    public const String PORT_STRING	 		= "port";
+        
+
+	    //--------------------------------------------------------------------------
+	    //
+	    //  Class Properties
+	    //
+	    //--------------------------------------------------------------------------
+
 	    /**
-	     *  The port used to connect Merapi
-	     */	
-	    public static int PORT = 12345; 
+	     * The port used to connect Merapi
+	     */
+	    public static int PORT                 = 12345;
     	
 
-        //--------------------------------------------------------------------------
+   	    //--------------------------------------------------------------------------
 	    //
 	    //  Class Methods
 	    //
@@ -52,23 +77,60 @@ namespace Merapi
 	    /**
 	     *  The single instance of the Merapi <code>Bridge</code>
 	     */	
-        public static Bridge Instance
+        public static Bridge GetInstance()
         {
-            get
-            {
-                System.Console.WriteLine( "Bridge.Instance" );
-    	        if ( __instance == null )
-    	        {
-			        __instance = new Bridge();
-
-                    new Thread( __instance.Run ).Start();
-    	        }
-        	    return __instance;
-            }
+    	    if ( Instance == null )
+    	    {
+			    Instance = new Bridge();
+			    Instance.RegisterHandlers();
+    	    }
+        	
+    	    return Instance;
         }
-        private static Bridge __instance;
+
+        /**
+         *  Opens the Merapi server socket
+         */
+        public static void Open() 
+        {
+    	    if ( Thread == null )
+    	    {
+    		    Bridge.Thread 			= new Thread( Bridge.GetInstance().Run );
+    		    Bridge.Thread.Start();
+        		
+    		    Bridge.IsRunning		= true;
+    	    }
+        }	
         
+        /**
+         *  Closes the Merapi server socket
+         */    
+        public static void Close()
+        {
+    	    Bridge.IsRunning			= false;
+    	    Bridge.Thread 				= null;
+        	
+    	    try
+    	    {
+                Instance.__server.Close();
+    	    }
+    	    catch ( IOException exception )
+    	    {
+    		    Bridge.Instance.__logger.Error( exception );
+    	    }
+        }
         
+	    //--------------------------------------------------------------------------
+	    //
+	    //  Class Variables
+	    //
+	    //--------------------------------------------------------------------------
+    	
+        private static Bridge 	Instance	= null;
+        private static Thread	Thread		= null;
+        private static bool	    IsRunning 	= true;
+        
+
 	    //--------------------------------------------------------------------------
         //
         //  Constructor
@@ -76,19 +138,13 @@ namespace Merapi
         //--------------------------------------------------------------------------
 
         /**
-         *  Constructor.
+         * Constructor.
          */
-	    private Bridge()
-	    {
-		    ReadConfig();
-    		
-		    __reader 		= new AMF3Reader(); // Using AMF3Reader by default, @todo make this configurable
-		    __writer 		= new AMF3Writer(); // Using AMF3Writer by default, @todo make this configurable
-		    __handlers 		= new Dictionary<String, List<IMessageHandler>>();
-    		
-		    //  Handle system execute message in the bridge
-		    //RegisterMessageHandler( Message.SYSTEM_EXECUTE, this );
-	    }
+        private Bridge() 
+        {
+    	    ReadConfig();
+            __handlers = new Dictionary<String, List<IMessageHandler>>();
+        }
 
 
         //--------------------------------------------------------------------------
@@ -96,44 +152,22 @@ namespace Merapi
         //  Methods
         //
         //--------------------------------------------------------------------------
-
-        /**
-         *  @protected
-         *  
-         *  Reads a config file and applies the settings
-         */
-	    protected void ReadConfig() 
-	    {
-            System.Console.WriteLine( "Bridge.ReadConfigs()" );
-
-            /* TODO : Port code
-		    try 
-		    {
-			    FileInputStream fis = new FileInputStream( "./config/merapi-config.xml" );
-			    Properties config = new Properties();
-			    config.loadFromXML( fis );
-			    fis.close();
-
-			    PORT = Integer.parseInt( config.getProperty( "port" ) );
-		    } 
-		    catch ( Exception e ) { }
-    		*/
-	    }
     	
         /**
          *  The run method of the thread
          */
 	    public void Run()
 	    {
-            System.Console.WriteLine( "Bridge.Run()" );
+            __logger.Info( "Bridge.Run()" );
 
 		    try 
 		    {
-			    __server = new Socket( AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp );
+			    __server = new Socket( AddressFamily.InterNetwork, SocketType.Stream, 
+                                       ProtocolType.Tcp );
                 __server.Bind( new IPEndPoint( IPAddress.Any, PORT ) );
                 __server.Listen( 4 );
 
-			    System.Console.WriteLine( "Merapi started on port: " + PORT );
+			    __logger.Info( "Merapi started on port: " + PORT );
     			
 			    while( true )
 			    {
@@ -141,7 +175,7 @@ namespace Merapi
 				    Socket temp = __server.Accept();
 				    __client    = temp;
 
-                    System.Console.WriteLine( "Acceptted a connection: " + __client );
+                    __logger.Info( "Acceptted a connection: " + __client );
 
 				    //  Instantiate a listener thread that will listen and read the input stream
 				    //  of the first client that connects and start the thread
@@ -151,7 +185,7 @@ namespace Merapi
 		    }
 		    catch ( Exception e )
 		    {
-			    System.Console.WriteLine( "Bridge.Run(): " + e );
+			    __logger.Error( "Bridge.Run(): " + e );
 		    }
 	    }
 
@@ -160,7 +194,7 @@ namespace Merapi
 	     */
 	    public void DispatchMessage( IMessage message )
 	    {
-            System.Console.WriteLine( "Bridge.DispatchMessage()" );
+            __logger.Info( "Bridge.DispatchMessage()" );
 
             List<IMessageHandler> list = null;
 
@@ -184,7 +218,7 @@ namespace Merapi
 	     */		
 	    public void RegisterMessageHandler( String type, IMessageHandler handler )
 	    {
-            System.Console.WriteLine( "Bridge.RegisterMessageHandler()" );
+            __logger.Info( "Bridge.RegisterMessageHandler()" );
 
 		    //  Get the list of handlers registered for the event type
             List<IMessageHandler> list = null;
@@ -208,7 +242,7 @@ namespace Merapi
          */		
 	    public void SendMessage( IMessage message )
         {
-            System.Console.WriteLine( "Bridge.SendMessage()" );
+            __logger.Info( "Bridge.SendMessage()" );
 
 		    if ( __client == null || __client.Connected == false ) return;
     		
@@ -219,7 +253,7 @@ namespace Merapi
             lenBytes[ 0 ] = (byte)bytes.Length;
             __client.Send( lenBytes );
 
-            System.Console.WriteLine( "Sending " + bytes.Length + " bytes." );
+            __logger.Info( "Sending " + bytes.Length + " bytes." );
 
 		    //  Send the message
             __client.Send( bytes );
@@ -230,7 +264,7 @@ namespace Merapi
 	     */		
 	    public void UnRegisterMessageHandler( String type, IMessageHandler handler )
 	    {
-            System.Console.WriteLine( "Bridge.UnRegisterMessageHandler()" );
+            __logger.Info( "Bridge.UnRegisterMessageHandler()" );
 
 		    //  Get the list of handlers registered for the event type
 		    List<IMessageHandler> list = __handlers[ type ];
@@ -248,35 +282,41 @@ namespace Merapi
 			    }
 		    }
 	    }
-    	
-	    /**
-	     *  Handles the <code>Merapi.Messages.Message.SYSTEM_EXECUTE</code> message type.
-	     */		
-	    public void HandleMessage( IMessage message )
+
+        /**
+	     *  @protected
+	     *  
+	     *  Instantiates the framework <code>IMessageHandlers</code>.
+	     */
+	    protected void RegisterHandlers()
 	    {
-            /* TODO : Port code
-		    //  All arrays are sent from Flex as type Object
-		    //  Need to convert to an Array of Strings for exec()
-		    Object[] data = (Object[])( (Message)message ).getData();
-		    String[] args = new String[ data.length ];
-		    for ( int i = 0; i < data.length; i++ )
-		    {
-			    args[ i ] = (String)data[ i ];
-		    }
-    		
-		    //  Use the args passed in the message to do a shell exec
-		    try 
-		    {
-			    Runtime.getRuntime().exec( args );
-		    }
-		    catch ( Exception e )
-		    {
-			    System.Console.WriteLine( Bridge.class );
-			    e.printStackTrace();
-		    }
-            */
+		    //  Registers SystemExecuteHandler as the IMessageHandler of the 
+		    //  SystemExecuteMessage.SYSTEM_EXECUTE message type.
+		    new SystemExecuteMessageHandler();
 	    }
     	
+        /**
+         *  @protected
+         *  
+         *  Reads a config file and applies the settings
+         */
+	    protected void ReadConfig() 
+	    {
+            __logger.Info( "Bridge.ReadConfigs()" );
+
+            /* TODO : Port code
+		    try 
+		    {
+			    FileInputStream fis = new FileInputStream( "./config/merapi-config.xml" );
+			    Properties config = new Properties();
+			    config.loadFromXML( fis );
+			    fis.close();
+
+			    PORT = Integer.parseInt( config.getProperty( "port" ) );
+		    } 
+		    catch ( Exception e ) { }
+    		*/
+	    }    	
     	
 	    //--------------------------------------------------------------------------
 	    //
@@ -310,15 +350,22 @@ namespace Merapi
          *  
 	     *  The <code>IWriter</code> used to serialize data sent across the bridge to Flex.
 	     */
-	    private IWriter 				__writer 				= null;
+	    private IWriter 				__writer 				= new AMF3Writer();
     	
 	    /**
 	     *  @private
          *  
 	     *  The <code>IReader</code> used to deserialize data that comes across the bridge from Flex.
 	     */
-	    private IReader 				__reader 				= null;
-    	
+	    private IReader 				__reader 				= new AMF3Reader();
+
+        /**
+         *  @private 
+         * 
+         *  An instance of the log4j logger to handle the logging.
+         */
+        private ILog 					__logger 				= LogManager.GetLogger( typeof( Bridge ) );
+
 	    /**
 	     *  @private
          *  

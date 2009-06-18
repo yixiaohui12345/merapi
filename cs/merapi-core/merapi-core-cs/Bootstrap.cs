@@ -28,7 +28,7 @@ namespace Merapi
 
             PolicyServer.Start();
 
-            Bridge b = Bridge.Instance;
+            Bridge b = Bridge.GetInstance();
 
             HelloWorldListener hwl = new HelloWorldListener();
 
