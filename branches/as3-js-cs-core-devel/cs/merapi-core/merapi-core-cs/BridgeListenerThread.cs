@@ -60,7 +60,7 @@ namespace Merapi
 
 		    //  When the first byte returns is equal to -1, the socket has been disconnected
 		    //  we let the thread end at the point.
-            while ( bytes != null && bytes.Length > 0 && bytes[ 0 ] != -1 ) 
+            while ( bytes != null && bytes.Length > 0 && bytes[ 0 ] != Int32.Parse( "-1" ) ) 
 		    {
 			    try 
 			    {
@@ -72,7 +72,7 @@ namespace Merapi
                         foreach ( IMessage message in messages )
                         {
                             //  Broadcast the Message from the Bridge
-                            Bridge.Instance.DispatchMessage( message );
+                            Bridge.GetInstance().DispatchMessage( message );
                         }
 
                         bytes = new byte[ __client.ReceiveBufferSize ];

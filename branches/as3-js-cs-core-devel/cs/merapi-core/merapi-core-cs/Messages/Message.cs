@@ -23,18 +23,6 @@ namespace merapi.messages
     {
         //--------------------------------------------------------------------------
         //
-        //  Constants
-        //
-        //--------------------------------------------------------------------------
-
-        /**
-         *  Message type for a system execute command.
-         */
-        public const String SYSTEM_EXECUTE = "systemExecute";
-
-
-        //--------------------------------------------------------------------------
-        //
         //  Constructor
         //
         //--------------------------------------------------------------------------
@@ -113,7 +101,7 @@ namespace merapi.messages
         {
             try
             {
-                Bridge.Instance.SendMessage( this );
+                Bridge.GetInstance().SendMessage( this );
             }
             catch ( Exception e )
             {

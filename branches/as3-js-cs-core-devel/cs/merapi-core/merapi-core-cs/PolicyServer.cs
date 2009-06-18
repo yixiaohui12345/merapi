@@ -243,7 +243,7 @@ namespace merapi
                     if ( _socketOut != null ) _socketOut.Close();
                     if ( _socketIn != null ) _socketIn.Close();
                 }
-                catch ( IOException e ) { }
+                catch ( IOException e ) { System.Console.WriteLine( e ); }
 
                 _socketIn = null;
                 _socketOut = null;

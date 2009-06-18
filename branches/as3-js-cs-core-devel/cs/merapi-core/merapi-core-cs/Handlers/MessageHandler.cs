@@ -55,7 +55,7 @@ namespace Merapi.Handlers
          */
         public void AddMessageType( String type )
         {
-            Bridge.Instance.RegisterMessageHandler( type, this );
+            Bridge.GetInstance().RegisterMessageHandler( type, this );
         }
 
         /**
@@ -63,7 +63,7 @@ namespace Merapi.Handlers
          */
         public void RemoveMessageType( String type )
         {
-            Bridge.Instance.UnRegisterMessageHandler( type, this );
+            Bridge.GetInstance().UnRegisterMessageHandler( type, this );
         }
     }
 }
