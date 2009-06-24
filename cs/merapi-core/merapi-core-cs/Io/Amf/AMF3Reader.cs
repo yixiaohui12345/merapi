@@ -54,7 +54,6 @@ namespace Merapi.Io.Amf
 
             foreach ( byte b in bytes )
             {
-                if ( b == 0 ) break;
                 ms.WriteByte( b );
             }
 

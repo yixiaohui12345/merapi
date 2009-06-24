@@ -11,6 +11,7 @@ using System.IO;
 using Merapi.Io.Reader;
 using System.Net.Sockets;
 using merapi.messages;
+using System.Threading;
 
 namespace Merapi
 {
@@ -55,28 +56,44 @@ namespace Merapi
         {
             System.Console.WriteLine( "BridgeListenerThread.Run()" );
 
-            byte[] bytes = new byte[ __client.ReceiveBufferSize ];
-            __client.Receive( bytes );
+            byte[] bytes = null;
+            bool firstRead = true;
+
 
 		    //  When the first byte returns is equal to -1, the socket has been disconnected
-		    //  we let the thread end at the point.
-            while ( bytes != null && bytes.Length > 0 && bytes[ 0 ] != Int32.Parse( "-1" ) ) 
+		    //  we let the thread end at this point.
+            while ( firstRead == true || ( bytes != null && bytes.Length > 0 && 
+                    bytes[ 0 ] != Int32.Parse( "-1" ) ) )
 		    {
-			    try 
+                firstRead = false;
+
+                //  not ideal.. fix this
+                while ( __client.Available == 0 )
+                {
+                    Thread.Sleep( 500 );
+                }
+          
+                System.Console.WriteLine( __client.Available + " bytes recv'd." );
+                
+                try 
 			    {
+                    bytes = new byte[ __client.Available ];
+                    __client.Receive( bytes );
+
 				    List<IMessage> messages = __reader.read( bytes );
+
+                    if ( bytes != null && bytes.Length > 0 )
+                    {
+                        System.Console.WriteLine( "First byte: " + bytes[ 0 ] );
+                    }
 
                     if ( messages != null && messages.Count > 0 )
                     {
-
                         foreach ( IMessage message in messages )
                         {
                             //  Broadcast the Message from the Bridge
                             Bridge.GetInstance().DispatchMessage( message );
                         }
-
-                        bytes = new byte[ __client.ReceiveBufferSize ];
-                        __client.Receive( bytes );
                     }
                     else
                     {
