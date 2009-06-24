@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute">
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute"
+ initialize="trace('loading security' );
+ 			 trace( 'Security.loadPolicyFile( \'xmlsocket://' + Bridge.HOST + ':12344	\' );' );
+ 			 Security.allowInsecureDomain( Bridge.HOST );
+ 			 Security.loadPolicyFile( 'xmlsocket://' + Bridge.HOST + ':12344' );
+ 			 new JavaScriptExtension();">
+ 			 
 	<mx:Script>
 		<![CDATA[
-			import merapi.JavaScriptExtension;
 			import merapi.Bridge;
-			
-			{
-				new JavaScriptExtension();
-			}
+			import merapi.JavaScriptExtension;
 		]]>
 	</mx:Script>
+	
 </mx:Application>

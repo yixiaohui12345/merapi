@@ -25,7 +25,8 @@ import merapi.messages.IMessage;
 /**
  *  The Bootstrap class is used to execute the Merapi Java process.
  */
-public class Bootstrap {
+public class Bootstrap 
+{
 	
 	//--------------------------------------------------------------------------
 	//

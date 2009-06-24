@@ -102,11 +102,11 @@ namespace merapi
                 _listening = true;
 
                 // Start listening for connections
-                _socketServer = new Socket( AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp );
-                IPEndPoint ipLocal = new IPEndPoint( IPAddress.Any, _port );
-                //bind to local IP Address...
-                _socketServer.Bind( ipLocal );
-                //start listening...
+                _socketServer = new Socket( AddressFamily.InterNetwork, SocketType.Stream, 
+                                            ProtocolType.Tcp );
+                _socketServer.Bind( new IPEndPoint( IPAddress.Any, _port ) );
+               
+                // start listening...
                 _socketServer.Listen( 4 );
 
                 if ( DEBUG ) System.Console.WriteLine( "PolicyServer listening on port " + _port );
@@ -114,7 +114,12 @@ namespace merapi
                 while ( _listening )
                 {
                     // Wait for a connection and accept it
+
+                    System.Console.WriteLine( "1" );
+
                     Socket socket = _socketServer.Accept();
+
+                    System.Console.WriteLine( "2" );
 
                     try
                     {
@@ -151,7 +156,7 @@ namespace merapi
 
             /**
              * Constructor takes the Socket object for this connection
-             * @param socket_	Socket connection to a client created by the PolicyServer main thread
+             * @param socket_ Socket connection to a client created by the PolicyServer main thread
              */
             public SocketConnection( Socket socket_ )
             {

@@ -18,7 +18,7 @@ Learn more about Flex at http://flex.org
 <link rel="stylesheet" type="text/css" href="history/history.css" />
 <!--  END Browser History required section -->
 
-<title>${title}</title>
+<title></title>
 <script src="AC_OETags.js" language="javascript"></script>
 
 <!--  BEGIN Browser History required section -->
@@ -35,17 +35,45 @@ body { margin: 0px; overflow:hidden }
 // -----------------------------------------------------------------------------
 // Globals
 // Major version of Flash required
-var requiredMajorVersion = ${version_major};
+var requiredMajorVersion = 9;
 // Minor version of Flash required
-var requiredMinorVersion = ${version_minor};
+var requiredMinorVersion = 0;
 // Minor version of Flash required
-var requiredRevision = ${version_revision};
+var requiredRevision = 124;
 
 function sendAMessage()
 {
 	var testMessage = new Message( "test" );
+	testMessage.data = new Object();
+	testMessage.data.aString = "some text";
+	testMessage.data.aVal = 123.5;
 	testMessage.send();
 }
+
+var mh = new MessageHandler();
+var mh2 = new MessageHandler();
+
+function regListeners()
+{
+	mh.addMessageType( "test" );
+	mh.handleMessage = function( message )
+	{
+		alert( "mh: message.type:" + message.type + ", message.data.aString:" + message.data.aString + ", message.data.aVal:" + message.data.aVal );
+	}
+
+	mh2.addMessageType( "test" );
+	mh2.handleMessage = function( message )
+	{
+		alert( "mh2: message.type:" + message.type + ", message.data.aString:" + message.data.aString + ", message.data.aVal:" + message.data.aVal );
+	}
+}
+
+function unregListeners()
+{
+	mh.removeMessageType( "test" );
+	mh2.removeMessageType( "test" );
+}
+
 
 // -----------------------------------------------------------------------------
 // -->
@@ -54,8 +82,12 @@ function sendAMessage()
 
 <body scroll="no">
 	
-	<input type="button" value="send message" onclick="sendAMessage()" />
-	
+<input type="button" value="1. Connect Merapi" onclick="connectMerapi()" />
+<input type="button" value="2. Register listeners" onclick="regListeners()" />
+<input type="button" value="3. Send message" onclick="sendAMessage()" />
+<input type="button" value="4. Unregister listeners" onclick="unregListeners()" />
+<input type="button" value="5. Disconnect Merapi" onclick="disconnectMerapi()" />	
+
 <script language="JavaScript" type="text/javascript">
 <!--
 // Version check for the Flash Player that has the ability to start Player Product Install (6.0r65)
@@ -129,5 +161,10 @@ if ( hasProductInstall && !hasRequestedVersion ) {
 			</embed>
 	</object>
 </noscript>
+
+<script type="text/javascript">
+	var bridge = document.getElementById( "flex" );
+</script>
+
 </body>
 </html>
