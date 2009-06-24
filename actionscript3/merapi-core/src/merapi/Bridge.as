@@ -1,15 +1,17 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
 //  This program is free software; you can redistribute it and/or modify 
-//  it under the terms of the GNU Lesser General Public LicenseLicense as published by the Free Software Foundation; either either version 3 of the License, or (at your option) any later version.sion.
+//  it under the terms of the GNU Lesser General Public License
+//  as published by the Free Software Foundation; either either version 3 of 
+//  the License, or (at your option) any later version.
 //
 //  This program is distributed in the hope that it will be useful, but 
 //  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
-//  or FITNESS FOR A PARTICULAR PURPOSE. SGNU Lesser General Public LicensePublic License 
-//  License for more details.details.
+//  or FITNESS FOR A PARTICULAR PURPOSE. 
 //
-//  You should have received GNU Lesser General Public Licenseeneral Public License along 
-//  along with this program; if not,f not, see <http://www.gnu.org/copyleft/lesser.html/lesser.html>.
+//  You should have received GNU Lesser General Public License along 
+//  along with this program; if not, see 
+//  <http://www.gnu.org/copyleft/lesser.html/lesser.html>.
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -381,6 +383,7 @@ public class Bridge
         try
         {
             var bytes : ByteArray = __writer.write( message );
+        	trace( "sending " + bytes.length + " bytes." );
         }
         
         //  If an error is caught, dispatch the MerapiErrorEvent.SERIALIZATION_ERROR event.
@@ -429,9 +432,11 @@ public class Bridge
      *
      *  Event handler; Responds to IOErrorEvents from the __client socket.
      */
-    private function handleIOError( event : IOErrorEvent ) : void
+    private function handleIOError( event : Event ) : void
     {
         __client = null;
+        
+        trace( event );
         
         dispatchMessage( new MerapiErrorMessage( MerapiErrorMessage.CONNECT_FAILURE_ERROR ));
     }
