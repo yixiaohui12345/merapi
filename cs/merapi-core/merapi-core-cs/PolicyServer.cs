@@ -116,7 +116,7 @@ namespace merapi
                     // Wait for a connection and accept it
 
                     System.Console.WriteLine( "1" );
-
+                    
                     Socket socket = _socketServer.Accept();
 
                     System.Console.WriteLine( "2" );
@@ -133,7 +133,7 @@ namespace merapi
                     }
 
                     // Wait for a sec until a new connection is accepted to avoid flooding
-                    //Thread.Sleep( 1000 );
+                    Thread.Sleep( 1000 );
                 }
             }
             catch ( IOException e )
