@@ -12,6 +12,8 @@ using Merapi.Io.Reader;
 using System.Net.Sockets;
 using merapi.messages;
 using System.Threading;
+using log4net;
+using merapi_core_cs;
 
 namespace Merapi
 {
@@ -24,7 +26,8 @@ namespace Merapi
      */
 	public class BridgeListenerThread
 	{
-
+        private static readonly ILog __logger = LogManager.GetLogger( typeof( BridgeListenerThread ) );
+ 
 	    //--------------------------------------------------------------------------
         //
         //  Constructor
@@ -36,9 +39,13 @@ namespace Merapi
          */
 	    public BridgeListenerThread( Socket client, IReader reader ) : base()
 	    {
+            __logger.Debug( LoggingConstants.METHOD_BEGIN );
+
 		    __client 	    = client;
 		    __reader      	= reader;
-	    }
+
+            __logger.Debug( LoggingConstants.METHOD_END );
+        }
 
     	
 	    //--------------------------------------------------------------------------
@@ -54,7 +61,7 @@ namespace Merapi
 	     */
 	    public void Run() 
         {
-            System.Console.WriteLine( "BridgeListenerThread.Run()" );
+            __logger.Debug( LoggingConstants.METHOD_BEGIN );
 
             byte[] bytes = null;
             bool firstRead = true;
@@ -72,8 +79,8 @@ namespace Merapi
                 {
                     Thread.Sleep( 500 );
                 }
-          
-                System.Console.WriteLine( __client.Available + " bytes recv'd." );
+
+                __logger.Debug( __client.Available + " bytes recv'd." );
                 
                 try 
 			    {
@@ -84,7 +91,7 @@ namespace Merapi
 
                     if ( bytes != null && bytes.Length > 0 )
                     {
-                        System.Console.WriteLine( "First byte: " + bytes[ 0 ] );
+                        __logger.Debug( "First byte: " + bytes[ 0 ] );
                     }
 
                     if ( messages != null && messages.Count > 0 )
@@ -103,13 +110,14 @@ namespace Merapi
     			
 			    catch ( Exception exception )
 			    {
-                    System.Console.Write( "BridgeListenerThread.Run(): " + exception.ToString() );
+                    __logger.Error( exception.ToString() );
                     bytes = null;
 			    }
 		    }
-    		
-		    System.Console.WriteLine( "BridgeListenerThread stopped running." );
-	    }
+
+            __logger.Info( "BridgeListenerThread stopped running." );
+            __logger.Debug( LoggingConstants.METHOD_END );
+        }
 
     	
 	    //--------------------------------------------------------------------------

@@ -42,6 +42,8 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -70,10 +72,10 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="libs\FluorineFx.dll" />
+    <Compile Include="LoggingConstants.cs" />
     <Compile Include="MyPolicyServer.cs" />
     <Compile Include="systemexecute\handlers\SystemExecuteMessageHandler.cs" />
     <Compile Include="systemexecute\messages\SystemExecuteMessage.cs" />
-    <Compile Include="TcpSock.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

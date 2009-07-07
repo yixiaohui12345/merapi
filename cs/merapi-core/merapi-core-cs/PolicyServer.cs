@@ -6,6 +6,8 @@ using System.Net.Sockets;
 using System.IO;
 using System.Threading;
 using System.Net;
+using log4net;
+using merapi_core_cs;
 
 namespace merapi
 {
@@ -18,6 +20,8 @@ namespace merapi
      */
     public class PolicyServer
     {
+        private static readonly ILog __logger = LogManager.GetLogger( typeof( PolicyServer ) );
+
         /**
 	     * If no argument is passed the server will listen on this port for connections
 	     */
@@ -36,11 +40,15 @@ namespace merapi
          */
         public static void Start()
         {
+            __logger.Debug( LoggingConstants.METHOD_BEGIN );
+
             int port = DEFAULT_PORT;
 
             // Start the PolicyServer
             PolicyServer server = new PolicyServer( port, new String[] { "*:80" } );
             new Thread( server.Run ).Start();
+
+            __logger.Debug( LoggingConstants.METHOD_END );
         }
 
 
@@ -59,10 +67,16 @@ namespace merapi
          */
         public PolicyServer( int port_, String[] allowedHosts_ )
         {
+            __logger.Debug( LoggingConstants.METHOD_BEGIN );
+            __logger.Debug( "port_: " + port_ );
+            __logger.Debug( "allowedHosts_: " + allowedHosts_ );
+
             _port = port_;
             _listening = true;
             if ( allowedHosts_ == null ) allowedHosts_ = DEFAULT_POLICY;
             _policy = buildPolicy( allowedHosts_ );
+
+            __logger.Debug( LoggingConstants.METHOD_END );
         }
 
         /**
@@ -72,6 +86,8 @@ namespace merapi
          */
         private String buildPolicy( String[] allowedHosts_ )
         {
+            __logger.Debug( LoggingConstants.METHOD_BEGIN );
+
             StringBuilder policyBuffer = new StringBuilder();
 
             policyBuffer.Append( "<?xml version=\"1.0\"?><cross-domain-policy>" );
@@ -89,6 +105,8 @@ namespace merapi
             }
             policyBuffer.Append( "</cross-domain-policy>" );
 
+            __logger.Debug( LoggingConstants.METHOD_END );
+
             return policyBuffer.ToString();
         }
 
@@ -97,6 +115,8 @@ namespace merapi
          */
         public void Run()
         {
+            __logger.Debug( LoggingConstants.METHOD_BEGIN );
+
             try
             {
                 _listening = true;
@@ -109,27 +129,22 @@ namespace merapi
                 // start listening...
                 _socketServer.Listen( 4 );
 
-                if ( DEBUG ) System.Console.WriteLine( "PolicyServer listening on port " + _port );
+                __logger.Info( "PolicyServer listening on port " + _port );
 
                 while ( _listening )
                 {
                     // Wait for a connection and accept it
-
-                    System.Console.WriteLine( "1" );
-                    
                     Socket socket = _socketServer.Accept();
-
-                    System.Console.WriteLine( "2" );
 
                     try
                     {
-                        if ( DEBUG ) System.Console.WriteLine( "PolicyServer got a connection on port " + _port );
+                        __logger.Info( "PolicyServer got a connection on port " + _port );
                         // Start a new connection thread
                         new Thread( new SocketConnection( socket ).Run ).Start();
                     }
                     catch ( Exception e )
                     {
-                        if ( DEBUG ) System.Console.WriteLine( "Exception: " + e.ToString() );
+                        __logger.Error( "Exception: " + e.ToString() );
                     }
 
                     // Wait for a sec until a new connection is accepted to avoid flooding
@@ -138,8 +153,10 @@ namespace merapi
             }
             catch ( IOException e )
             {
-                if ( DEBUG ) System.Console.WriteLine( "IO Exception: " + e.ToString() );
+                __logger.Error( "IO Exception: " + e.ToString() );                           
             }
+
+            __logger.Debug( LoggingConstants.METHOD_BEGIN );
         }
 
         /**
@@ -160,7 +177,11 @@ namespace merapi
              */
             public SocketConnection( Socket socket_ )
             {
+                __logger.Debug( LoggingConstants.METHOD_BEGIN );
+
                 _socket = socket_;
+
+                __logger.Debug( LoggingConstants.METHOD_END );
             }
 
             /**
@@ -168,7 +189,11 @@ namespace merapi
              */
             public void Run()
             {
+                __logger.Debug( LoggingConstants.METHOD_BEGIN );
+
                 readPolicyRequest();
+
+                __logger.Debug( LoggingConstants.METHOD_END );
             }
 
             /**
@@ -177,6 +202,8 @@ namespace merapi
              */
             private void readPolicyRequest()
             {
+                __logger.Debug( LoggingConstants.METHOD_BEGIN );
+
                 try
                 {
                     // Read the request and compare it to the request string defined in the constants.
@@ -189,6 +216,8 @@ namespace merapi
                     if ( DEBUG ) System.Console.WriteLine( "PolicyServer.readPolicyRequest() " + e.ToString() );
                 }
                 Close();
+
+                __logger.Debug( LoggingConstants.METHOD_END );
             }
 
             /**
@@ -200,6 +229,8 @@ namespace merapi
              */
             private String read()
             {
+                __logger.Debug( LoggingConstants.METHOD_BEGIN );
+
                 byte[] buffer = new byte[ _socket.ReceiveBufferSize ];
                 _socket.Receive( buffer );
 
@@ -211,6 +242,8 @@ namespace merapi
                     strb.Append( (char)byt );
                 }
 
+                __logger.Debug( LoggingConstants.METHOD_END );
+
                 return strb.ToString();
             }
 
@@ -220,6 +253,8 @@ namespace merapi
              */
             public void Write( String msg )
             {
+                __logger.Debug( LoggingConstants.METHOD_BEGIN );
+
                 msg += "\u0000";
                 
                 char[] chars = msg.ToCharArray();
@@ -234,7 +269,8 @@ namespace merapi
 
                 _socket.Send( buffer );
 
-                if ( DEBUG ) System.Console.WriteLine( "Wrote: " + msg );
+                __logger.Debug( "Wrote: " + msg );
+                __logger.Debug( LoggingConstants.METHOD_END );
             }
 
             /**
@@ -242,6 +278,8 @@ namespace merapi
              */
             public void Close()
             {
+                __logger.Debug( LoggingConstants.METHOD_BEGIN );
+
                 try
                 {
                     if ( _socket != null ) _socket.Close();
@@ -253,6 +291,8 @@ namespace merapi
                 _socketIn = null;
                 _socketOut = null;
                 _socket = null;
+
+                __logger.Debug( LoggingConstants.METHOD_BEGIN );
             }
 
         }

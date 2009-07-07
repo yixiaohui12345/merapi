@@ -32,6 +32,7 @@ using Merapi.Handlers;
 using log4net.Repository.Hierarchy;
 using log4net;
 using merapi.systemexecute.handlers;
+using merapi_core_cs;
 
 namespace Merapi
 {
@@ -79,13 +80,17 @@ namespace Merapi
 	     */	
         public static Bridge GetInstance()
         {
+            __logger.Debug( LoggingConstants.METHOD_BEGIN );
+
     	    if ( Instance == null )
     	    {
 			    Instance = new Bridge();
 			    Instance.RegisterHandlers();
     	    }
-        	
-    	    return Instance;
+
+            __logger.Debug( LoggingConstants.METHOD_END );
+
+            return Instance;
         }
 
         /**
@@ -116,7 +121,7 @@ namespace Merapi
     	    }
     	    catch ( IOException exception )
     	    {
-    		    Bridge.Instance.__logger.Error( exception );
+    		    __logger.Error( exception );
     	    }
         }
         
@@ -129,6 +134,7 @@ namespace Merapi
         private static Bridge 	Instance	= null;
         private static Thread	Thread		= null;
         private static bool	    IsRunning 	= true;
+        private static ILog     __logger    = LogManager.GetLogger( typeof( Bridge ) );
         
 
 	    //--------------------------------------------------------------------------
@@ -158,7 +164,7 @@ namespace Merapi
          */
 	    public void Run()
 	    {
-            __logger.Info( "Bridge.Run()" );
+            __logger.Debug( LoggingConstants.METHOD_BEGIN );
 
 		    try 
 		    {
@@ -185,8 +191,10 @@ namespace Merapi
 		    }
 		    catch ( Exception e )
 		    {
-			    __logger.Error( "Bridge.Run(): " + e );
+			    __logger.Error( e );
 		    }
+
+            __logger.Debug( LoggingConstants.METHOD_END );
 	    }
 
 	    /**
@@ -194,7 +202,7 @@ namespace Merapi
 	     */
 	    public void DispatchMessage( IMessage message )
 	    {
-            __logger.Info( "Bridge.DispatchMessage()" );
+            __logger.Debug( LoggingConstants.METHOD_BEGIN );
 
             List<IMessageHandler> list = null;
 
@@ -210,6 +218,8 @@ namespace Merapi
 				    handler.HandleMessage( message );
 			    }
 		    }
+
+            __logger.Debug( LoggingConstants.METHOD_END );
 	    }
     	
 	    /**
@@ -218,7 +228,9 @@ namespace Merapi
 	     */		
 	    public void RegisterMessageHandler( String type, IMessageHandler handler )
 	    {
-            __logger.Info( "Bridge.RegisterMessageHandler()" );
+            __logger.Debug( LoggingConstants.METHOD_BEGIN );
+            __logger.Debug( "type: \"" + type + "\"" );
+            __logger.Debug( "handler: " + handler );
 
 		    //  Get the list of handlers registered for the event type
             List<IMessageHandler> list = null;
@@ -235,6 +247,8 @@ namespace Merapi
     		
 		    //  Add the handler to the list
 		    list.Add( handler );
+
+            __logger.Debug( LoggingConstants.METHOD_END );
 	    }	
 
         /**
@@ -242,7 +256,7 @@ namespace Merapi
          */		
 	    public void SendMessage( IMessage message )
         {
-            __logger.Info( "Bridge.SendMessage()" );
+            __logger.Debug( LoggingConstants.METHOD_BEGIN );
 
 		    if ( __client == null || __client.Connected == false ) return;
     		
@@ -253,10 +267,12 @@ namespace Merapi
             lenBytes[ 0 ] = (byte)bytes.Length;
             __client.Send( lenBytes );
 
-            __logger.Info( "Sending " + bytes.Length + " bytes." );
+            __logger.Debug( "Sending " + bytes.Length + " bytes." );
 
 		    //  Send the message
             __client.Send( bytes );
+
+            __logger.Debug( LoggingConstants.METHOD_END );
 	    }	
     	
 	    /**
@@ -264,7 +280,7 @@ namespace Merapi
 	     */		
 	    public void UnRegisterMessageHandler( String type, IMessageHandler handler )
 	    {
-            __logger.Info( "Bridge.UnRegisterMessageHandler()" );
+            __logger.Debug( LoggingConstants.METHOD_BEGIN );
 
 		    //  Get the list of handlers registered for the event type
 		    List<IMessageHandler> list = __handlers[ type ];
@@ -281,6 +297,8 @@ namespace Merapi
 				    }
 			    }
 		    }
+
+            __logger.Debug( LoggingConstants.METHOD_END );
 	    }
 
         /**
@@ -302,7 +320,7 @@ namespace Merapi
          */
 	    protected void ReadConfig() 
 	    {
-            __logger.Info( "Bridge.ReadConfigs()" );
+            __logger.Debug( LoggingConstants.METHOD_BEGIN );
 
             /* TODO : Port code
 		    try 
@@ -316,6 +334,8 @@ namespace Merapi
 		    } 
 		    catch ( Exception e ) { }
     		*/
+
+            __logger.Debug( LoggingConstants.METHOD_END );
 	    }    	
     	
 	    //--------------------------------------------------------------------------
@@ -358,13 +378,6 @@ namespace Merapi
 	     *  The <code>IReader</code> used to deserialize data that comes across the bridge from Flex.
 	     */
 	    private IReader 				__reader 				= new AMF3Reader();
-
-        /**
-         *  @private 
-         * 
-         *  An instance of the log4j logger to handle the logging.
-         */
-        private ILog 					__logger 				= LogManager.GetLogger( typeof( Bridge ) );
 
 	    /**
 	     *  @private
