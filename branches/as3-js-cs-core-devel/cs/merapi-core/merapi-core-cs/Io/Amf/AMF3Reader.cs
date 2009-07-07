@@ -1,8 +1,20 @@
-﻿////////////////////////////////////////////////////////////////////////////////
+﻿/////////////////////////////////////////////////////////////////////////////////////
 //
-//  $license
+//  This program is free software; you can redistribute it and/or modify 
+//  it under the terms of the GNU Lesser General Public License as published 
+//  by the Free Software Foundation; either version 3 of the License, or (at 
+//  your option) any later version.
 //
-////////////////////////////////////////////////////////////////////////////////
+//  This program is distributed in the hope that it will be useful, but 
+//  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
+//  or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public 
+//  License for more details.
+//
+//  You should have received a copy of the GNU Lesser General Public License 
+//  along with this program; if not, see <http://www.gnu.org/copyleft/lesser.html>.
+//
+/////////////////////////////////////////////////////////////////////////////////////
+
 
 using System;
 using System.Collections.Generic;
@@ -11,6 +23,8 @@ using FluorineFx.IO;
 using System.IO;
 using merapi.messages;
 using FluorineFx;
+using log4net;
+using merapi_core_cs;
 
 namespace Merapi.Io.Amf
 {
@@ -25,6 +39,20 @@ namespace Merapi.Io.Amf
     {
         //--------------------------------------------------------------------------
         //
+        //  Static variables
+        //
+        //--------------------------------------------------------------------------
+
+        /**
+         *  @private 
+         * 
+         *  An instance of the log4net logger to handle the logging.
+         */
+        private static readonly ILog __logger = LogManager.GetLogger( typeof( MessageHandler ) );
+
+
+        //--------------------------------------------------------------------------
+        //
         //  Constructor
         //
         //--------------------------------------------------------------------------
@@ -35,6 +63,8 @@ namespace Merapi.Io.Amf
         public AMF3Reader()
             : base()
         {
+            __logger.Debug( LoggingConstants.METHOD_BEGIN );
+            __logger.Debug( LoggingConstants.METHOD_END );
         }
 
 
@@ -50,6 +80,9 @@ namespace Merapi.Io.Amf
          */
         public List<IMessage> read( byte[] bytes )
         {
+            __logger.Debug( LoggingConstants.METHOD_BEGIN );
+            __logger.Debug( "bytes.length: " + bytes.Length );
+
             MemoryStream ms = new MemoryStream();
 
             foreach ( byte b in bytes )
@@ -68,7 +101,8 @@ namespace Merapi.Io.Amf
             }
             catch ( Exception exception )
             {
-                System.Console.WriteLine( "AMF3Reader.read() [1]: " + exception );
+                __logger.Error( "AMF3Reader.read() [1]: " + exception );
+                __logger.Debug( LoggingConstants.METHOD_END );
                 return null;
             }
 
@@ -79,10 +113,13 @@ namespace Merapi.Io.Amf
             {
                 if ( decoded is IMessage )
                 {
+                    __logger.Debug( "Decoded message is an IMessage." );
                     message = decoded as IMessage;
                 }
                 else if ( decoded is ASObject )
                 {
+                    __logger.Debug( "Decoded message is not an IMessage... converting." );
+                    
                     ASObject aso = decoded as ASObject;
                     
                     Message m = new Message();
@@ -92,6 +129,7 @@ namespace Merapi.Io.Amf
 
                     message = m;
                 }
+
                 messages.Add( message );
 
                 try
@@ -107,10 +145,13 @@ namespace Merapi.Io.Amf
                 }
                 catch ( Exception exception )
                 {
-                    System.Console.WriteLine( "AMF3Reader.read() [2]: " + exception );
+                    __logger.Error( exception );
                     decoded = null;
                 }
             }
+
+            __logger.Debug( "Decoded " + messages.Count + " messages." );
+            __logger.Debug( LoggingConstants.METHOD_END );
 
             return messages;
         }

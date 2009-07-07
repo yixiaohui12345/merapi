@@ -17,6 +17,8 @@
 
 using merapi.messages;
 using System;
+using log4net;
+using merapi_core_cs;
 
 namespace merapi.systemexecute.messages
 {
@@ -31,6 +33,20 @@ namespace merapi.systemexecute.messages
      */
     public class SystemExecuteMessage : Message
     {
+        //--------------------------------------------------------------------------
+        //
+        //  Static variables
+        //
+        //--------------------------------------------------------------------------
+
+        /**
+         *  @private 
+         * 
+         *  An instance of the log4net logger to handle the logging.
+         */
+        private static readonly ILog __logger = LogManager.GetLogger( typeof( SystemExecuteMessageHandler ) );
+        
+        
         //--------------------------------------------------------------------------
         //
         //  Constants
@@ -54,6 +70,8 @@ namespace merapi.systemexecute.messages
          */
         public SystemExecuteMessage() : base()
         {
+            __logger.Debug( LoggingConstants.METHOD_BEGIN );
+            __logger.Debug( LoggingConstants.METHOD_END );
         }
 
 

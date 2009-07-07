@@ -15,16 +15,33 @@
 //
 /////////////////////////////////////////////////////////////////////////////////////
 
+
 using Merapi.Handlers;
 using merapi.messages;
 using merapi.systemexecute.messages;
 using System;
+using log4net;
+using merapi_core_cs;
 
 namespace merapi.systemexecute.handlers
 {
 
     public class SystemExecuteMessageHandler : MessageHandler
     {
+        //--------------------------------------------------------------------------
+        //
+        //  Static variables
+        //
+        //--------------------------------------------------------------------------
+
+        /**
+         *  @private 
+         * 
+         *  An instance of the log4net logger to handle the logging.
+         */
+        private static readonly ILog __logger = LogManager.GetLogger( typeof( SystemExecuteMessageHandler ) );
+
+        
         //--------------------------------------------------------------------------
         //
         //  Constructors
@@ -35,7 +52,11 @@ namespace merapi.systemexecute.handlers
          *  The default constructor
          */
         public SystemExecuteMessageHandler()
-             : base( SystemExecuteMessage.SYSTEM_EXECUTE ) {}
+             : base( SystemExecuteMessage.SYSTEM_EXECUTE ) 
+        {
+            __logger.Debug( LoggingConstants.METHOD_BEGIN );
+            __logger.Debug( LoggingConstants.METHOD_END );
+        }
        
 
         //--------------------------------------------------------------------------
@@ -49,6 +70,9 @@ namespace merapi.systemexecute.handlers
          */
         public void handleMessage( IMessage message )
         {
+            __logger.Debug( LoggingConstants.METHOD_BEGIN );
+            __logger.Debug( "message: " + message );
+
             if ( message is SystemExecuteMessage )
             {
                 SystemExecuteMessage sem = (SystemExecuteMessage)message;
@@ -59,18 +83,22 @@ namespace merapi.systemexecute.handlers
                     string[] args = sem.args;
                     if ( args.Length > 1 )
                     {
+                        __logger.Debug( "Executing " + args[ 0 ] + " " + args[ 1 ] + "." );
                         System.Diagnostics.Process.Start( args[ 0 ], args[ 1 ] );
                     }
                     else if ( args.Length == 1 )
                     {
+                        __logger.Debug( "Executing " + args[ 0 ] + "." );
                         System.Diagnostics.Process.Start( args[ 0 ] );
                     }
                 }
                 catch ( Exception e )
                 {
-                    System.Console.WriteLine( e );
+                    __logger.Error( e );
                 }
             }
+
+            __logger.Debug( LoggingConstants.METHOD_END );
         }
 
     }
