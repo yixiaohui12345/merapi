@@ -73,7 +73,6 @@
   <ItemGroup>
     <Content Include="libs\FluorineFx.dll" />
     <Compile Include="LoggingConstants.cs" />
-    <Compile Include="MyPolicyServer.cs" />
     <Compile Include="systemexecute\handlers\SystemExecuteMessageHandler.cs" />
     <Compile Include="systemexecute\messages\SystemExecuteMessage.cs" />
   </ItemGroup>

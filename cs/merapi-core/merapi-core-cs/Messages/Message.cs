@@ -1,14 +1,28 @@
-﻿////////////////////////////////////////////////////////////////////////////////
+﻿/////////////////////////////////////////////////////////////////////////////////////
 //
-//  $license
+//  This program is free software; you can redistribute it and/or modify 
+//  it under the terms of the GNU Lesser General Public License as published 
+//  by the Free Software Foundation; either version 3 of the License, or (at 
+//  your option) any later version.
 //
-////////////////////////////////////////////////////////////////////////////////
+//  This program is distributed in the hope that it will be useful, but 
+//  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
+//  or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public 
+//  License for more details.
+//
+//  You should have received a copy of the GNU Lesser General Public License 
+//  along with this program; if not, see <http://www.gnu.org/copyleft/lesser.html>.
+//
+/////////////////////////////////////////////////////////////////////////////////////
+
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Merapi;
+using log4net;
+using merapi_core_cs;
 
 namespace merapi.messages
 {
@@ -23,6 +37,20 @@ namespace merapi.messages
     {
         //--------------------------------------------------------------------------
         //
+        //  Static variables
+        //
+        //--------------------------------------------------------------------------
+
+        /**
+         *  @private 
+         * 
+         *  An instance of the log4net logger to handle the logging.
+         */
+        private static readonly ILog __logger = LogManager.GetLogger( typeof( Message ) );
+
+        
+        //--------------------------------------------------------------------------
+        //
         //  Constructor
         //
         //--------------------------------------------------------------------------
@@ -32,7 +60,12 @@ namespace merapi.messages
          */
         public Message()
         {
+            __logger.Debug( LoggingConstants.METHOD_BEGIN );
+
             this.uid = System.Guid.NewGuid().ToString();
+
+            __logger.Debug( "uid: " + uid );
+            __logger.Debug( LoggingConstants.METHOD_END );
         }
 
         /**
@@ -41,7 +74,12 @@ namespace merapi.messages
         public Message( String type )
             : this()
         {
+            __logger.Debug( LoggingConstants.METHOD_BEGIN );
+            __logger.Debug( "type: \"" + type + "\"" );
+
             this.type = type;
+
+            __logger.Debug( LoggingConstants.METHOD_END );
         }
 
         /**
@@ -50,7 +88,12 @@ namespace merapi.messages
         public Message( String type, Object data )
             : this( type )
         {
+            __logger.Debug( LoggingConstants.METHOD_BEGIN );
+            __logger.Debug( "data: " + data );
+
             this.data = data;
+
+            __logger.Debug( LoggingConstants.METHOD_END );
         }
 
 
@@ -99,14 +142,18 @@ namespace merapi.messages
          */
         public void send()
         {
+            __logger.Debug( LoggingConstants.METHOD_BEGIN );
+
             try
             {
                 Bridge.GetInstance().SendMessage( this );
             }
             catch ( Exception e )
             {
-                System.Console.Write( "Message.send(): " + e.ToString() );
+                __logger.Error( e );
             }
+
+            __logger.Debug( LoggingConstants.METHOD_END );
         }
 
 
