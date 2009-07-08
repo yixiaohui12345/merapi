@@ -44,7 +44,7 @@ namespace merapi.systemexecute.messages
          * 
          *  An instance of the log4net logger to handle the logging.
          */
-        private static readonly ILog __logger = LogManager.GetLogger( typeof( SystemExecuteMessageHandler ) );
+        private static readonly ILog __logger = LogManager.GetLogger( typeof( SystemExecuteMessage ) );
         
         
         //--------------------------------------------------------------------------
