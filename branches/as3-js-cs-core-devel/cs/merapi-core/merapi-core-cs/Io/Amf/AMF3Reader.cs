@@ -48,7 +48,7 @@ namespace Merapi.Io.Amf
          * 
          *  An instance of the log4net logger to handle the logging.
          */
-        private static readonly ILog __logger = LogManager.GetLogger( typeof( MessageHandler ) );
+        private static readonly ILog __logger = LogManager.GetLogger( typeof( AMF3Reader ) );
 
 
         //--------------------------------------------------------------------------
