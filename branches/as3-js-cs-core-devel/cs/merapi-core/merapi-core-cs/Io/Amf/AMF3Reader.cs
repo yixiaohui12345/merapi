@@ -101,7 +101,7 @@ namespace Merapi.Io.Amf
             }
             catch ( Exception exception )
             {
-                __logger.Error( "AMF3Reader.read() [1]: " + exception );
+                __logger.Error( exception );
                 __logger.Debug( LoggingConstants.METHOD_END );
                 return null;
             }
