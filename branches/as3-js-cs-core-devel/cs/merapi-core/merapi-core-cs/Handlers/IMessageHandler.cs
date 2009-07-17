@@ -38,5 +38,10 @@ namespace Merapi.Handlers
          *  Handles an <code>IMessage</code> dispatched from the Bridge.
          */
         void HandleMessage( IMessage message );
+
+        /**
+         *  Removes all types being listened for by this IMessageHandler
+         */
+        void UnregisterAllTypes();
     }
 }

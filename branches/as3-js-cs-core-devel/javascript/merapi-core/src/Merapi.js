@@ -270,3 +270,33 @@
  */
 /*public static*/ var handlersMap = new Object();
 
+
+    
+//--------------------------------------------------------------------------
+//
+//  MerapiErrorMessage Constants
+//
+//--------------------------------------------------------------------------
+
+/**
+ *  Event type for a serialization error.
+ */
+/*public static*/ var SERIALIZE_ERROR     	/* String */ = "serializeError";
+ 
+/**
+ *  Event type for a deserialization error.
+ */
+/*public static*/ var DESERIALIZE_ERROR     /* String */ = "deserializeError";
+ 
+/**
+ *  Event type for a connect failure error.
+ */
+/*public static*/ var CONNECT_FAILURE_ERROR /* String */ = "connectFailureError";
+
+/**
+ *  Event type for an initialization error.
+ */
+/*public static*/ var INITIALIZATION_ERROR  /* String */ = "initializationError";
+
+
+/*public static*/ var CONNECT_SUCCESS 		/* String */ = "connectSuccess";

@@ -45,6 +45,8 @@ public class JavaScriptExtension extends MessageHandler
      */		
 	public function JavaScriptExtension()
 	{
+		Security.loadPolicyFile( 'xmlsocket://' + Bridge.HOST + ':12344' );
+		
 		Bridge.getInstance();
 		
 		ExternalInterface.addCallback( "registerMessageHandler", registerMessageHandler );
@@ -55,7 +57,6 @@ public class JavaScriptExtension extends MessageHandler
 		ExternalInterface.addCallback( "systemExecute", systemExecute );
 		
 		__handler = new JavaScriptHandler();
-		
 	}
 
 		
