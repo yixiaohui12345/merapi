@@ -88,6 +88,20 @@ namespace Merapi.Handlers
         }
 
         /**
+         *  Removes all of the type registrations, cleaning up any
+         *  external references held by the Bridge to this Handler
+         */
+        public virtual void UnregisterAllTypes()
+        {
+            String[] types = Types.ToArray();
+
+            foreach ( String type in types )
+            {
+                RemoveMessageType( type );
+            }
+        }
+
+        /**
          *  Adds another message type to be listend for by this instance of MessageHandler.
          */
         public void AddMessageType( String type )
@@ -95,6 +109,7 @@ namespace Merapi.Handlers
             __logger.Debug( LoggingConstants.METHOD_BEGIN );
             __logger.Debug( "type: \"" + type + "\"" );
 
+            Types.Add( type );
             Bridge.GetInstance().RegisterMessageHandler( type, this );
 
             __logger.Debug( LoggingConstants.METHOD_END );
@@ -108,10 +123,24 @@ namespace Merapi.Handlers
             __logger.Debug( LoggingConstants.METHOD_BEGIN );
             __logger.Debug( "type: \"" + type + "\"" );
 
+            Types.Remove( type );
             Bridge.GetInstance().UnRegisterMessageHandler( type, this );
 
             __logger.Debug( LoggingConstants.METHOD_END );
         }
+
+        //--------------------------------------------------------------------------
+        //
+        //  Variables
+        //
+        //--------------------------------------------------------------------------
+
+        /**
+         *  @protected
+         *  
+         *  The types this handler is registered to listen for
+         */
+        protected List<string> Types = new List<string>();
     }
 }
 

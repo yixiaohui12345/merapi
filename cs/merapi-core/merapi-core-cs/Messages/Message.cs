@@ -37,6 +37,21 @@ namespace merapi.messages
     {
         //--------------------------------------------------------------------------
         //
+        //  Static Methods
+        //
+        //--------------------------------------------------------------------------
+
+        /**
+         *  Convience method to check if a message matches a type.
+         */
+        public static bool IsType( IMessage message, string type )
+        {
+            return type.Equals( message.type );
+        }
+
+
+        //--------------------------------------------------------------------------
+        //
         //  Static variables
         //
         //--------------------------------------------------------------------------

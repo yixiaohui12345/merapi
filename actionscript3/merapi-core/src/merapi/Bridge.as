@@ -29,6 +29,7 @@ import flash.utils.ByteArray;
 import flash.utils.Dictionary;
 import flash.utils.getDefinitionByName;
 
+import merapi.connect.ConnectMessage;
 import merapi.error.MerapiErrorMessage;
 import merapi.handlers.IMessageHandler;
 import merapi.io.amf.AMF3Reader;
@@ -212,6 +213,8 @@ public class Bridge
                 __instance.__client.addEventListener( SecurityErrorEvent.SECURITY_ERROR, __instance.handleIOError );
                 
                 __instance.__client.addEventListener( ProgressEvent.SOCKET_DATA, __instance.handleReceiveSocketData );
+                
+                __instance.__client.addEventListener( Event.CONNECT, function( e : Event ) : void { __instance.dispatchMessage( new ConnectMessage( ConnectMessage.CONNECT_SUCCESS ) ); } );
             }
             catch ( error : Error )
             {
@@ -435,8 +438,6 @@ public class Bridge
     private function handleIOError( event : Event ) : void
     {
         __client = null;
-        
-        trace( event );
         
         dispatchMessage( new MerapiErrorMessage( MerapiErrorMessage.CONNECT_FAILURE_ERROR ));
     }

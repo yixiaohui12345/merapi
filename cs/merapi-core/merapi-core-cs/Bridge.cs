@@ -207,7 +207,13 @@ namespace Merapi
             List<IMessageHandler> list = null;
 
 		    //  Get the list of handlers registered for the event type
-            if ( __handlers.ContainsKey( message.type ) == false ) return;
+            if ( __handlers.ContainsKey(message.type) == false )
+            {
+                __logger.Debug( "No handlers registered, exiting method." );
+                __logger.Debug( LoggingConstants.METHOD_END );
+                return;
+            }
+
             list = __handlers[ message.type ];
     		
 		    //  If the list is not null and not empty notify the registered event handlers 
