@@ -22,6 +22,7 @@ import flash.events.Event;
 import flash.events.IOErrorEvent;
 import flash.events.ProgressEvent;
 import flash.events.SecurityErrorEvent;
+import flash.external.ExternalInterface;
 import flash.net.Socket;
 import flash.net.URLLoader;
 import flash.net.URLRequest;
