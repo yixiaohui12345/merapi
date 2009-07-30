@@ -116,6 +116,14 @@ public class Message implements IMessage
 	{
 		Bridge.getInstance().sendMessage( this, responder );
 	}
+	
+	/**
+	 *  Dispatchs message across on this side of the bridge.
+	 */
+	public function dispatch() : void 
+	{
+		Bridge.getInstance().dispatchMessage( this );
+	}
 
 
     //--------------------------------------------------------------------------
