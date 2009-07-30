@@ -22,6 +22,7 @@ import flash.system.Security;
 
 import merapi.handlers.MessageHandler;
 import merapi.messages.DynamicMessage;
+import merapi.messages.IMessage;
 	
 
 /**
@@ -52,11 +53,17 @@ public class JavaScriptExtension extends MessageHandler
 		ExternalInterface.addCallback( "registerMessageHandler", registerMessageHandler );
 		ExternalInterface.addCallback( "unRegisterMessageHandler", unRegisterMessageHandler );
 		ExternalInterface.addCallback( "sendMessage", sendMessage );
+		ExternalInterface.addCallback( "dispatchMessage", dispatchMessage );
 		ExternalInterface.addCallback( "connectMerapi", connectMerapi );
 		ExternalInterface.addCallback( "disconnectMerapi", disconnectMerapi );
 		ExternalInterface.addCallback( "systemExecute", systemExecute );
-		
+
 		__handler = new JavaScriptHandler();
+	}
+	
+	private function alert( o : Object ) : void
+	{
+		ExternalInterface.call( "alert", o );
 	}
 
 		
@@ -90,6 +97,21 @@ public class JavaScriptExtension extends MessageHandler
     	}
     	
     	m.send();
+    }
+    
+    public function dispatchMessage( message : * ) : void
+    {
+    	var m : DynamicMessage = new DynamicMessage();
+    	
+    	for ( var propName : String in message )
+    	{
+    		if ( !( m[ propName ] is Function ) )
+    		{
+    			m[ propName ] = message[ propName ];
+    		}
+    	}
+    	
+    	Bridge.getInstance().dispatchMessage( m );
     }
     
     protected var __handler : JavaScriptHandler = null;

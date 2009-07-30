@@ -300,3 +300,79 @@
 
 
 /*public static*/ var CONNECT_SUCCESS 		/* String */ = "connectSuccess";
+
+
+/**
+ *  The <code>SharedObjectMessage</code> class is used to proxy calls to a Flash shared object from JavaScript 
+ */
+//public class merapi.messages.SharedObjectMessage
+//{
+
+	/*public static*/ var METHOD_CALL			= "methodCall";
+	/*public static*/ var RESULT				= "result";
+	
+	/*public static*/ var GET_LOCAL 			= "getLocal";
+	/*public static*/ var CLEAR			 	 	= "clear";
+	/*public static*/ var CLOSE			 		= "close";
+	/*public static*/ var FLUSH			 		= "flush";	
+	
+	//--------------------------------------------------------------------------
+	//
+	//  Constructor
+	//
+	//--------------------------------------------------------------------------
+	
+	/**
+	 *  Constructor.
+	 */		
+	function SharedObjectMessage( type /*String*/, methodName /*String*/ ) /* -> void */
+	{
+		//  Properties
+		this.type   	= type; // The MethodType
+		this.so			= null; // The sharedObject
+		this.methodName = null; // The method name to call
+		this.localName	= null; // The name of the SharedObject
+	}
+	
+	
+	//--------------------------------------------------------------------------
+	//
+	//  Properties
+	//
+	//--------------------------------------------------------------------------
+	
+	//----------------------------------
+	//  uid
+	//----------------------------------
+	
+	/**
+	 *  A unique ID for the message.
+	 */		
+	/*public*/ var uid; /* String */
+	
+	//----------------------------------
+	//  type
+	//----------------------------------
+	
+	/**
+	 *  The type of the message.
+	 */		
+	/*public*/ var type; /* String */
+	
+	
+	//--------------------------------------------------------------------------
+	//
+	//  Methods
+	//
+	//--------------------------------------------------------------------------
+	
+	/**
+	 *  Sends the event across the Merapi bridge.
+	 */
+	/*public function send() -> void */
+	Message.prototype.send = function()
+	{
+		bridge.sendMessage( this );
+	}
+
+//} end class
