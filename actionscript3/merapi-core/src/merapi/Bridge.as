@@ -22,7 +22,6 @@ import flash.events.Event;
 import flash.events.IOErrorEvent;
 import flash.events.ProgressEvent;
 import flash.events.SecurityErrorEvent;
-import flash.external.ExternalInterface;
 import flash.net.Socket;
 import flash.net.URLLoader;
 import flash.net.URLRequest;
@@ -450,12 +449,42 @@ public class Bridge
      */
     private function handleReceiveSocketData( event : ProgressEvent ) : void
     {
+    	if ( event.bytesLoaded != __client.bytesAvailable )
+    	{
+//    		trace( "event.bytesLoaded != __client.bytesAvailable == true" );
+//	    	trace( event.bytesLoaded );
+//	    	trace( __client.bytesAvailable );
+//	    	trace();
+	    }
+    	
         //  The first byte sent by the native side of the bridge is the total
         //  packet size. This value is persisted and reset to -1 when a set 
         //  of messages have been read successfully.
-        if ( __totalBytes == -1 )
+        if ( __totalBytes == -1 )	
         {
-            __totalBytes = __client.readByte();
+//        	trace( "__client.bytesAvailable: " + __client.bytesAvailable );
+        	
+        	if ( __totalBytesBuffer == null )
+        	{
+            	__totalBytesBuffer = new ByteArray();
+         	}
+            
+        	while( __client.bytesAvailable >= 4 && __totalBytesBuffer.length < 4 )
+        	{
+	            __client.readBytes( __totalBytesBuffer, __totalBytesBuffer.length, 1 ); 
+        	}
+        	
+        	if ( __totalBytesBuffer.length == 4 )
+        	{
+        		__totalBytesBuffer.position = 0;
+	        	__totalBytes = __totalBytesBuffer.readInt();
+        	}
+        	else
+        	{
+        		return;
+        	}
+        	
+//            trace( "__totalBytes: " + __totalBytes );
         }
         
         //  A buffer __byteBuffer is used to read the bytes. 
@@ -472,7 +501,14 @@ public class Bridge
         }
         
         //  Read the bytes from the socket
-        __client.readBytes( __byteBuffer, __byteBuffer.length, __client.bytesAvailable );
+        __client.readBytes( __byteBuffer, __byteBuffer.length, 
+        				    __totalBytes - __byteBuffer.length );
+        trace( "Reading: " + __totalBytes + "." );
+//        trace( "header length: " + __totalBytes );
+//        trace( "buffer size: " + __byteBuffer.length );
+//        trace( "progress event - bytesTotal " + event.bytesTotal );
+//        trace( "progress event - bytesLoaded " + event.bytesLoaded );
+//        trace( );
         
         //  If __byteBuffer.length is less than __totalBytes, that means there are more
         //  bytes to be read. (This will happen in the next frame in the case of large
@@ -534,6 +570,7 @@ public class Bridge
             //  When all messages have been processed, reset __totalBytes to -1 
             //  to prepare for the next packet of binary data
             __totalBytes = -1;
+			__totalBytesBuffer = new ByteArray();
             __byteBuffer = null;
         }
         
@@ -658,6 +695,7 @@ public class Bridge
      *  The total number of bytes in the current packet being transmitted.
      */
     private var __totalBytes : int = -1;
+    private var __totalBytesBuffer : ByteArray = null;
     
     /**
      *  @private
