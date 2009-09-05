@@ -239,7 +239,12 @@ public class Bridge implements Runnable
 
         byte[] bytes = __writer.write( message );
 
+        System.out.println( "Sending " + bytes.length + " bytes." );
+        
         //  Send the length of the message first
+        __client.getOutputStream().write( bytes.length >> 24 );
+        __client.getOutputStream().write( bytes.length >> 16 );
+        __client.getOutputStream().write( bytes.length >> 8 );
         __client.getOutputStream().write( bytes.length );
 
         //  Send the message
