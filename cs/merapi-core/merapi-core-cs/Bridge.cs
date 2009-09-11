@@ -267,17 +267,75 @@ namespace Merapi
 		    if ( __client == null || __client.Connected == false ) return;
     		
 		    byte[] bytes = __writer.write( message );
-
+           
+            /*
 		    //  Send the length of the message first
             byte[] lenBytes = new byte[ 1 ];
             lenBytes[ 0 ] = (byte)bytes.Length;
-            __client.Send( lenBytes );
-
-            __logger.Debug( "Sending " + bytes.Length + " bytes." );
-
-		    //  Send the message
+            __logger.Debug("Sending Header " + lenBytes.Length + " bytes.");
+            //send the header
+            __client.Send(lenBytes);
+            //  Send the message
+            __logger.Debug("Sending " + bytes.Length + " bytes.");
             __client.Send( bytes );
+             */
+            /**/
+            //  Send the length of the message first
+            byte[] lenBytes = new byte[4];
+            lenBytes[0] = (byte)(bytes.Length >> 24);
+            lenBytes[1] = (byte)(bytes.Length >> 16);
+            lenBytes[2] = (byte)(bytes.Length >> 8);
+            lenBytes[3] = (byte)bytes.Length;
+            __logger.Debug("Sending Header " + lenBytes.Length + " bytes.");
+            //send the header
+            __client.Send(lenBytes);
+            //  Send the message
+            __logger.Debug("Sending " + bytes.Length + " bytes.");
+            __client.Send(bytes);
+             
+            /*
+            int msgLen = message.ToString().Length;
+            // convert string length value to network order
+            int msgLenH2N = IPAddress.HostToNetworkOrder(msgLen);
+            // get string length value into a byte array -- for use with
+            // Socket.Send
+            byte[] msgLenArray = BitConverter.GetBytes(msgLenH2N);
+            __logger.Debug("Sending Header H2N " + msgLenArray.Length + " bytes.");
+            // send the length value
+            __client.Send(msgLenArray, 4, System.Net.Sockets.SocketFlags.None);
+            */
+            /*
+            int total = 0; 
+            int size = message.ToString().Length; 
+            int dataleft = size; 
+            int sent; 
+            byte[] datasize = new byte[4]; 
+            datasize = BitConverter.GetBytes(size);
+            __logger.Debug("Sending Header " + datasize.Length + " bytes.");
+            sent = __client.Send(datasize);
 
+            
+            while (total < size) {
+                __logger.Debug("Sending " + bytes.Length + " bytes.");
+                sent = __client.Send(bytes, total, dataleft, SocketFlags.None); 
+                total += sent; 
+                dataleft -= sent; 
+            }
+            */
+
+
+            /*
+            using (NetworkStream ns = new NetworkStream(__server))
+            {
+                ns.WriteByte((byte)(bytes.Length >> 24));
+                ns.WriteByte((byte)(bytes.Length >> 16));
+                ns.WriteByte((byte)(bytes.Length >> 8));
+                ns.WriteByte((byte)(bytes.Length));
+
+                __logger.Debug("Sending " + bytes.Length + " bytes.");
+                ns.Write(bytes, 0, bytes.Length);
+            }
+             */
             __logger.Debug( LoggingConstants.METHOD_END );
 	    }	
     	
