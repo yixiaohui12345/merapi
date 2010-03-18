@@ -281,12 +281,12 @@ public class Bridge
         __respondersMap = new Dictionary();
     
         //  Listens for the Event.CLOSING event of application and disconnect the 
-        //  socket if this event is dispatched.	(Although this library does not 
+        //  socket if this event is dispatched. (Although this library does not 
         //  reference the AIR APIs directly, Event.CLOSING is only thrown by a 
         //  WindowedApplication. Alternate Application instance will not dipatch
         //  this Event and therefore will not close tidly.)
         //Application.application.addEventListener( CLOSING, handleApplicationClose, 
-        //										  false, 0, true );
+        //                                        false, 0, true );
     }
     
     /**
@@ -386,7 +386,7 @@ public class Bridge
         try
         {
             var bytes : ByteArray = __writer.write( message );
-        	trace( "sending " + bytes.length + " bytes." );
+            trace( "sending " + bytes.length + " bytes." );
         }
         
         //  If an error is caught, dispatch the MerapiErrorEvent.SERIALIZATION_ERROR event.
@@ -449,129 +449,83 @@ public class Bridge
      */
     private function handleReceiveSocketData( event : ProgressEvent ) : void
     {
-    	if ( event.bytesLoaded != __client.bytesAvailable )
-    	{
-//    		trace( "event.bytesLoaded != __client.bytesAvailable == true" );
-//	    	trace( event.bytesLoaded );
-//	    	trace( __client.bytesAvailable );
-//	    	trace();
-	    }
-    	
-        //  The first byte sent by the native side of the bridge is the total
-        //  packet size. This value is persisted and reset to -1 when a set 
-        //  of messages have been read successfully.
-        if ( __totalBytes == -1 )	
-        {
-//        	trace( "__client.bytesAvailable: " + __client.bytesAvailable );
-        	
-        	if ( __totalBytesBuffer == null )
-        	{
-            	__totalBytesBuffer = new ByteArray();
-         	}
-            
-        	while( __client.bytesAvailable >= 4 && __totalBytesBuffer.length < 4 )
-        	{
-	            __client.readBytes( __totalBytesBuffer, __totalBytesBuffer.length, 1 ); 
-        	}
-        	
-        	if ( __totalBytesBuffer.length == 4 )
-        	{
-        		__totalBytesBuffer.position = 0;
-	        	__totalBytes = __totalBytesBuffer.readInt();
-        	}
-        	else
-        	{
-        		return;
-        	}
-        	
-//            trace( "__totalBytes: " + __totalBytes );
-        }
-        
-        //  A buffer __byteBuffer is used to read the bytes. 
-        if ( __byteBuffer == null )
-        {
-            __byteBuffer = new ByteArray();
-        }
-        
-        //  If __byteBuffer is not null, the read bytes are appended to __byteBuffer 
-        //  and the position on the buffer is set to 0
-        else
-        {
-            __byteBuffer.position = 0;
-        }
-        
-        //  Read the bytes from the socket
-        __client.readBytes( __byteBuffer, __byteBuffer.length, 
-        				    __totalBytes - __byteBuffer.length );
-        trace( "Reading: " + __totalBytes + "." );
-//        trace( "header length: " + __totalBytes );
-//        trace( "buffer size: " + __byteBuffer.length );
-//        trace( "progress event - bytesTotal " + event.bytesTotal );
-//        trace( "progress event - bytesLoaded " + event.bytesLoaded );
-//        trace( );
-        
-        //  If __byteBuffer.length is less than __totalBytes, that means there are more
-        //  bytes to be read. (This will happen in the next frame in the case of large
-        //  amounts of data sent across the bridge.)
-        if ( __byteBuffer.length < __totalBytes )
-            return;
+    	// This trace reveals that between the time the ProgressEvent is constructed
+    	// and we process it here, the Socket may have received more data.
+//        if ( event.bytesLoaded != __client.bytesAvailable )
+//        {
+//            trace( "event.bytesLoaded != __client.bytesAvailable == true" );
+//            trace( event.bytesLoaded );
+//            trace( __client.bytesAvailable );
+//            trace();
+//        }
         
         try
         {
-            //  An array of 1 or more decoded messages. (Decoded by __reader)
-            var messages : Array = __reader.read( __byteBuffer ).reverse();
-            
-            //  A local var of the message currently being dispatched.
-            var message : IMessage = null;
-            var decoded : Object = messages.pop();
-            if ( decoded is IMessage )
-            {
-                message = decoded as IMessage;
-            }
-            else
-            {
-                var m : Message = new Message();
-                m.type = decoded.type;
-                m.data = decoded.data;
-                m.uid = decoded.uid;
-                message = m;
-            }
-            
-            //  While there are items in the array messages, dispatch the messages to
-            //  registered IMessageHandlers. If any IResponders were registerd with 
-            //  the call, their result methods are invoked as well.
-            while ( message != null )
-            {
-                try
-                {
-                    //  Check in __respondersMaps to see if an IResponder has been
-                    //  registered for this message. (Mapped by Message.uid.) Notify
-                    //  the IResponder by invoking the result method. 
-                    if ( __respondersMap[ message[ UID ]] != null )
-                    {
-                        var responder : IResponder = __respondersMap[ message[ UID ]] as IResponder
-                        
-                        responder.result( message );
-                        
-                        __respondersMap[ message[ UID ]] = null;
-                    }
-                }
-                catch ( error : Error )
-                {
-                }
-                
-                //  Dispatchs the message to registered IMessageHandlers
-                dispatchMessage( message );
-                
-                //  Get the next message in messages
-                message = messages.pop() as IMessage
-            }
-            
-            //  When all messages have been processed, reset __totalBytes to -1 
-            //  to prepare for the next packet of binary data
-            __totalBytes = -1;
-			__totalBytesBuffer = new ByteArray();
-            __byteBuffer = null;
+        	var loopCount:int = 0;
+        	// Loop through the Socket buffer processing as many objects as we can.
+        	while (readNextObjectFromSocket())
+        	{
+        		loopCount++;
+        		
+	            //  An array of 1 or more decoded messages. (Decoded by __reader)
+	            var messages : Array = __reader.read( __byteBuffer ).reverse();
+	            
+	            //  A local var of the message currently being dispatched.
+	            var message : IMessage = null;
+	            var decoded : Object = messages.pop();
+	            if ( decoded is IMessage )
+	            {
+	                message = decoded as IMessage;
+	            }
+	            else
+	            {
+	                var m : Message = new Message();
+	                m.type = decoded.type;
+	                m.data = decoded.data;
+	                m.uid = decoded.uid;
+	                message = m;
+	            }
+	            
+	            //  While there are items in the array messages, dispatch the messages to
+	            //  registered IMessageHandlers. If any IResponders were registerd with 
+	            //  the call, their result methods are invoked as well.
+	            while ( message != null )
+	            {
+	                try
+	                {
+	                    //  Check in __respondersMaps to see if an IResponder has been
+	                    //  registered for this message. (Mapped by Message.uid.) Notify
+	                    //  the IResponder by invoking the result method. 
+	                    if ( __respondersMap[ message[ UID ]] != null )
+	                    {
+	                        var responder : IResponder = __respondersMap[ message[ UID ]] as IResponder
+	                        
+	                        responder.result( message );
+	                        
+	                        __respondersMap[ message[ UID ]] = null;
+	                    }
+	                }
+	                catch ( error : Error )
+	                {
+	                	trace("Error processing bridge message " + error);
+	                }
+	                
+	                //  Dispatchs the message to registered IMessageHandlers
+	                dispatchMessage( message );
+	                
+	                //  Get the next message in messages
+	                message = messages.pop() as IMessage
+	            }
+	            
+	            //  When all messages have been processed, reset __totalBytes to -1 
+	            //  to prepare for the next packet of binary data
+	            //trace("reset byteBuffer");
+	            __totalBytes = -1;
+	            __totalBytesBuffer = new ByteArray();
+	            __byteBuffer = null;
+	        }
+	        
+	        //trace("End Socket loop after " + loopCount);
         }
         
         //  Catch any errors in deserialization.
@@ -580,6 +534,156 @@ public class Bridge
             dispatchMessage( new MerapiErrorMessage( MerapiErrorMessage.DESERIALIZE_ERROR ));
         }
     }
+    
+    /**
+    * This method will copy only one object from the Socket per pass
+    * into the __byteBuffer.  If the Socket does not have enough available
+    * data we will return false and catch it on the next frame execution.
+    */ 
+    private function readNextObjectFromSocket() : Boolean
+    {
+    	if ( __client.bytesAvailable < 4 )
+        {
+            //trace("NOT ENOUGH DATA TO GET LENGTH " + __client.bytesAvailable);
+            return false;
+        }
+        
+        // trace("Socket bytes available: " + __client.bytesAvailable);  
+            
+        // When __totalBytes is -1 we need to initialize the value from
+        // the socket stream.  The only time this will not be -1 is when
+        // we do not yet have enough data in the socket to process.
+        if ( __totalBytes == -1 )
+        {
+            __totalBytes = __client.readInt();
+            //trace("Object byte length: " + __totalBytes);
+        }
+        
+        // Once we have established the number of bytes to read
+        // and the socket has that many available, read that many bytes
+        // into a ByteArray and return to process.
+        if ( __totalBytes > 0 && __totalBytes <= __client.bytesAvailable )
+        {
+        	// For each successful pass the calling method will reset the 
+        	// __totalBytes to -1 and null out the __byteBuffer var.
+        	if ( __byteBuffer == null )
+            {
+                __byteBuffer = new ByteArray();
+            }
+            
+            // Allways read one full object.
+            __client.readBytes( __byteBuffer, 0, __totalBytes );
+            return true;
+        }
+        
+        //trace("NOT ENOUGH DATA YET TO READ OBJECT " + __client.bytesAvailable + " Need: " + __totalBytes);
+        return false;
+    }
+
+/**
+     *  @private 
+     * 
+     *  Event handler; Responds to data sent by the java bridge.
+     */ 
+//    private function handleReceiveSocketData( event : ProgressEvent ) : void 
+//    {
+//        //  The first byte sent by the native side of the bridge is the total
+//        //  packet size. This value is persisted and reset to -1 when a set 
+//        //  of messages have been read successfully.
+//        
+//        if (__client.bytesAvailable < 4)
+//        {
+//        	trace("NOT ENOUGH DATA " + __client.bytesAvailable);
+//        	return;
+//        }
+//        else   
+//           trace("Socket bytes " + __client.bytesAvailable);     
+//        
+//        if ( __totalBytes == -1 )
+//        {
+//            __totalBytes                        = __client.readInt();
+//            //trace("Total Bytes " + __totalBytes);
+//        }
+//        
+//        //  A buffer __byteBuffer is used to read the bytes. 
+//        if ( __byteBuffer == null )
+//        {
+//            __byteBuffer                        = new ByteArray();
+//        }
+//        
+//        //  If __byteBuffer is not null, the read bytes are appended to __byteBuffer 
+//        //  and the position on the buffer is set to 0
+//        else
+//        {
+//            __byteBuffer.position               = 0;
+//        }
+//        
+//        //  Read the bytes from the socket
+//        trace("Read " + __client.bytesAvailable + "  " + __byteBuffer.length + " " + __totalBytes);
+//        __client.readBytes( __byteBuffer, __byteBuffer.length, __client.bytesAvailable );
+//        //trace("read success");
+//        
+//        //  If __byteBuffer.length is less than __totalBytes, that means there are more
+//        //  bytes to be read. (This will happen in the next frame in the case of large
+//        //  amounts of data sent across the bridge.)
+//        if ( __byteBuffer.length < __totalBytes ) 
+//        {
+//            //trace ("NEXT FRAME " + __byteBuffer.length + " < " + __totalBytes);        
+//            return;
+//        }
+//        
+//        try 
+//        {
+//            //  An array of 1 or more decoded messages. (Decoded by __reader)
+//            //trace("Reader before read ");
+//            var messages    : Array             = __reader.read( __byteBuffer ).reverse();
+//            //trace("Read after read " + messages.length);
+//            
+//            //  A local var of the message currently being dispatched.
+//            var message     : IMessage          = messages.pop() as IMessage;
+//            
+//            //  While there are items in the array messages, dispatch the messages to
+//            //  registered IMessageHandlers. If any IResponders were registerd with 
+//            //  the call, their result methods are invoked as well.
+//            while ( message != null )
+//            { 
+//                try 
+//                {
+//                    //  Check in __respondersMaps to see if an IResponder has been
+//                    //  registered for this message. (Mapped by Message.uid.) Notify
+//                    //  the IResponder by invoking the result method. 
+//                    if ( __respondersMap[ message[ UID ] ] != null )
+//                    {
+//                        var responder : IResponder = 
+//                            __respondersMap[ message[ UID ] ] as IResponder
+//                    
+//                        responder.result( message );
+//                        
+//                        __respondersMap[ message[ UID ] ] = null;
+//                    }
+//                }
+//                catch ( error : Error ) {}
+//                
+//                //  Dispatchs the message to registered IMessageHandlers
+//                dispatchMessage( message );
+//                
+//                //  Get the next message in messages
+//                message = messages.pop() as IMessage
+//            } 
+//            
+//            //  When all messages have been processed, reset __totalBytes to -1 
+//            //  to prepare for the next packet of binary data
+//            __totalBytes                        = -1;
+//            __byteBuffer                        = null;
+//        }
+//        
+//        //  Catch any errors in deserialization.
+//        catch( e : Error )
+//        {
+//            trace("ERROR: " + e);
+//            dispatchMessage( new MerapiErrorMessage( MerapiErrorMessage.DESERIALIZE_ERROR ) );
+//        }
+//    }
     
     /**
      *  Registers an <code>IMessageHandler</code> to receive notifications when a certain
